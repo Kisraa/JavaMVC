@@ -1,7 +1,12 @@
 package vn.hoidanit.laptopshop.service;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import vn.hoidanit.laptopshop.domain.User;
 import vn.hoidanit.laptopshop.repository.UserRepository;
 
@@ -28,4 +33,13 @@ public class UserService {
     public List<User> getAllUsersByEmail(String email) {
         return this.userRepository.findByEmail(email);
     }
+
+    public User getUserById(long id) {
+        return this.userRepository.getUserById(id);
+    }
+
+    public void deleteUser(long id) {
+        this.userRepository.deleteById(id);
+    }
+
 }
