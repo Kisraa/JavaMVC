@@ -29,7 +29,6 @@ public class UserController {
     public String getHomePage(Model model) {
         List<User> arrUsers = this.userService.getAllUsersByEmail("1@gmail.com");
         System.out.println(arrUsers);
-
         model.addAttribute("eric", "test");
         model.addAttribute("hoidanit", "from controller with model");
         return "hello";
@@ -44,17 +43,11 @@ public class UserController {
 
     @GetMapping("/admin/user/{id}")
     public String getUserDetailPage(Model model, @PathVariable long id) {
-
+        User user = this.userService.getUserById(id);
+        model.addAttribute("newUser", new User());
         model.addAttribute("id", id);
         return "admin/user/show";
     }
-
-    // @GetMapping("/admin/user/show")
-    // public String getUserDetail(Model model, @ModelAttribute("newUser") User
-    // hoidanit) {
-    // this.userService.getUserById(hoidanit.getId());
-    // return "redirect:/admin/user";
-    // }
 
     @GetMapping("/admin/user/create")
     public String getCreateUserPage(Model model) {
