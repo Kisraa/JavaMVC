@@ -5,11 +5,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
 
 import jakarta.servlet.DispatcherType;
 
@@ -34,9 +36,19 @@ public class SecurityConfiguration {
                 authProvider.setHideUserNotFoundExceptions(false);
                 return authProvider;
         }
+
         @Bean
-        public AuthenticationSuccessHandler customSuccessHandler(){
+        public AuthenticationSuccessHandler customSuccessHandler() {
                 return new CustomSuccessHandler();
+        }
+
+        // rememberme clear session -> login +30days
+        @Bean
+        public SpringSessionRememberMeServices rememberMeServices() {
+                SpringSessionRememberMeServices rememberMeServices = new SpringSessionRememberMeServices();
+                // optionally customize
+                rememberMeServices.setAlwaysRemember(true);
+                return rememberMeServices;
         }
 
         // security v6
@@ -53,11 +65,19 @@ public class SecurityConfiguration {
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
+                                .sessionManagement((sessionManagement) -> sessionManagement
+                                                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                                                .invalidSessionUrl("/logout?expired")
+                                                .maximumSessions(1)// bao nhieu tai khoan dang nhap cung 1 thoi gian
+                                                .maxSessionsPreventsLogin(false)) // nguoi sau vao logout nguoi truoc ra
+                                .rememberMe(r -> r.rememberMeServices(rememberMeServices()))
                                 .formLogin(formLogin -> formLogin
                                                 .loginPage("/login")
                                                 .failureUrl("/login?error")
                                                 .successHandler(customSuccessHandler())
-                                                .permitAll());
+                                                .permitAll())
+                                .exceptionHandling(ex -> ex.accessDeniedPage("/access-deny"));
                 return http.build();
         }
+
 }
